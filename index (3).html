@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Care Companion roadmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#f4f6f8; --surface:#ffffff; --ink:#18212b; --muted:#5a6675; --line:#dce1e7;
+  --v1:#17695e; --v1-bg:#e1f2ef;
+  --next:#8a5a00; --next-bg:#fbefd2;
+  --later:#3d4f8a; --later-bg:#e5e9f7;
+  --out:#9a3b4a; --out-bg:#f8e3e6;
+  --triage:#555d68; --triage-bg:#e8eaed;
+  --risk:#b42318;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10151b; --surface:#192029; --ink:#e8edf2; --muted:#9aa6b4; --line:#2b3541;
+    --v1:#6fd3c2; --v1-bg:#14332f;
+    --next:#f0c36a; --next-bg:#3a2e12;
+    --later:#a5b4ee; --later-bg:#222a48;
+    --out:#f0a1ad; --out-bg:#41212a;
+    --triage:#b3bbc6; --triage-bg:#262d36;
+    --risk:#ff8f85;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10151b; --surface:#192029; --ink:#e8edf2; --muted:#9aa6b4; --line:#2b3541;
+  --v1:#6fd3c2; --v1-bg:#14332f;
+  --next:#f0c36a; --next-bg:#3a2e12;
+  --later:#a5b4ee; --later-bg:#222a48;
+  --out:#f0a1ad; --out-bg:#41212a;
+  --triage:#b3bbc6; --triage-bg:#262d36;
+  --risk:#ff8f85;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15px;line-height:1.45}
+header{padding:20px 20px 12px;max-width:1800px;margin:0 auto}
+h1{font-size:26px;margin:0 0 4px;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:0 0 14px;max-width:70ch}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.seg button{all:unset;cursor:pointer;padding:8px 14px;font-weight:700;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.seg button:focus-visible,.chip:focus-visible,select:focus-visible,input:focus-visible,.btn:focus-visible,.card:focus-visible{outline:3px solid var(--later);outline-offset:2px}
+input[type=search]{flex:1 1 200px;max-width:320px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:inherit}
+.btn{all:unset;cursor:pointer;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{all:unset;cursor:pointer;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:13px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.stats{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+.stat{padding:4px 10px;border-radius:8px;font-weight:700;font-size:13px}
+.s-v1{background:var(--v1-bg);color:var(--v1)}.s-next{background:var(--next-bg);color:var(--next)}.s-later{background:var(--later-bg);color:var(--later)}.s-out{background:var(--out-bg);color:var(--out)}.s-triage{background:var(--triage-bg);color:var(--triage)}
+
+/* board */
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(300px,320px);gap:14px;padding:8px 20px 40px;overflow-x:auto;max-width:1800px;margin:0 auto;align-items:start}
+.col{background:color-mix(in srgb,var(--surface) 55%,var(--bg));border:1px solid var(--line);border-radius:14px;min-width:0;display:flex;flex-direction:column}
+.col.over{outline:3px dashed var(--ink);outline-offset:-3px}
+.col-h{padding:12px 14px;border-bottom:3px solid var(--c);position:sticky;top:0;background:inherit;border-radius:14px 14px 0 0}
+.col-h h2{margin:0;font-size:17px;color:var(--c);display:flex;justify-content:space-between;gap:8px}
+.col-h p{margin:2px 0 0;font-size:12.5px;color:var(--muted)}
+.col-body{padding:10px;display:flex;flex-direction:column;gap:9px;min-height:80px}
+.card{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--g);border-radius:10px;padding:10px 12px;cursor:grab}
+.card.dragging{opacity:.4}
+.card h3{margin:0 0 3px;font-size:15px;line-height:1.3}
+.card p{margin:0 0 6px;font-size:13px;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;color:var(--muted)}
+.tag{padding:1px 8px;border-radius:999px;background:color-mix(in srgb,var(--g) 16%,var(--surface));color:var(--ink);font-weight:700}
+.score{margin-left:auto;font-weight:700;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:0 7px}
+.risk{color:var(--risk);font-weight:700}
+.note{margin-top:6px;padding:5px 8px;border-radius:6px;background:var(--next-bg);color:var(--ink);font-size:12.5px}
+.move{margin-top:8px}
+select{font:inherit;font-size:12.5px;padding:3px 6px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+.changed{font-size:12px;color:var(--next);font-weight:700}
+.bt{padding:1px 9px;border-radius:999px;font-weight:700;font-size:12px}
+.bt-next{background:var(--next-bg);color:var(--next)}
+.bt-later{background:var(--later-bg);color:var(--later)}
+.bt-out{background:var(--out-bg);color:var(--out)}
+.sprint-start{margin-left:22px}
+.col.wk{background:color-mix(in srgb,var(--surface) 70%,var(--bg))}
+.prog{height:6px;border-radius:4px;background:var(--line);overflow:hidden;margin-top:8px}
+.prog>i{display:block;height:100%;background:var(--v1)}
+.tb{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:12.5px;color:var(--muted)}
+.tb .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.tb .btn,.addt .btn,.cardadd .btn,.wk-add .btn{padding:4px 10px;font-size:12.5px;text-align:center}
+.cardadd,.addt{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.addt{padding:10px;border-top:1px solid var(--line);margin-top:0}
+.cardadd input,.addt input,.addt select,.col-h input[type=date]{padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:13.5px;min-width:0;max-width:100%}
+.col-h .meta{margin-top:6px;display:flex;gap:8px;align-items:center}
+.task{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--g,var(--line));border-radius:10px;padding:8px 10px;cursor:grab;display:flex;flex-direction:column;gap:6px}
+.task.dragging{opacity:.4}
+.task.done .ttl{text-decoration:line-through;color:var(--muted)}
+.trow{display:flex;gap:8px;align-items:center}
+.trow input[type=checkbox]{width:18px;height:18px;flex:none;accent-color:var(--v1)}
+.ttl{flex:1;min-width:0;border:0;border-bottom:1px solid transparent;background:transparent;font:inherit;font-weight:700;color:inherit;padding:2px 0}
+.ttl:focus{border-bottom-color:var(--line);outline:none}
+.icon{all:unset;cursor:pointer;padding:0 6px;color:var(--muted);font-size:20px;line-height:1}
+.icon:focus-visible{outline:3px solid var(--later);outline-offset:2px}
+.task .meta select{max-width:130px}
+.wk-add{display:flex;flex-direction:column;gap:8px;align-self:start;min-width:150px}
+.plus{all:unset;cursor:pointer;display:inline-block;vertical-align:middle;width:22px;height:22px;margin-left:6px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);text-align:center;line-height:20px;font-size:16px;font-weight:700}
+.plus:focus-visible{outline:3px solid var(--later);outline-offset:2px}
+.newtile{display:flex;flex-direction:column;gap:6px;background:var(--surface);border:2px dashed var(--ink);border-radius:10px;padding:10px}
+.newtile input,.newtile select{padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:13.5px;min-width:0;max-width:100%}
+.row2{display:flex;gap:8px}
+.newtile .btn,.move .btn{padding:4px 10px;font-size:12.5px}
+.s-backlog{background:var(--later-bg);color:var(--later)}
+
+/* roadmap */
+.road{padding:8px 20px 40px;max-width:1800px;margin:0 auto;overflow-x:auto}
+.grid{display:grid;grid-template-columns:170px repeat(3,minmax(300px,1fr));gap:0;min-width:1000px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}
+.gh{padding:10px 12px;font-weight:700;border-bottom:3px solid var(--c);color:var(--c);background:color-mix(in srgb,var(--surface) 55%,var(--bg))}
+.rl{padding:10px 12px;font-weight:700;border-top:1px solid var(--line);border-left:5px solid var(--g);background:color-mix(in srgb,var(--surface) 55%,var(--bg));font-size:14px}
+.rl small{display:block;font-weight:400;color:var(--muted)}
+.cell{padding:8px;border-top:1px solid var(--line);border-left:1px solid var(--line);display:flex;flex-direction:column;gap:5px}
+.pill{font-size:12.5px;padding:4px 8px;border-radius:7px;background:var(--bg);border:1px solid var(--line);line-height:1.3}
+.pill b{font-weight:700}
+.pill .risk{margin-left:3px}
+.empty{color:var(--muted);font-size:12px;padding:4px}
+.hidden{display:none!important}
+footer{max-width:1800px;margin:0 auto;padding:0 20px 28px;color:var(--muted);font-size:13px}
+@media (max-width:700px){h1{font-size:22px}.board{grid-auto-columns:86vw}}
+@media (prefers-reduced-motion:no-preference){.card{transition:box-shadow .15s}.card:hover{box-shadow:0 2px 10px rgba(0,0,0,.12)}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Care Companion V1 roadmap</h1>
+  <p class="sub">105 features sorted by proposed stage and ranked by priority score within each column. Next and Later items live in one Backlog, marked with a Next or Later tag, and Out items sit at the very bottom of it with an Out tag. Drag a card to another column, or use its Move menu, to promote it into V1 or park it. Drag V1 tiles into the week columns to the right to schedule them.</p>
+  <div class="bar">
+    <div class="seg" role="group" aria-label="View">
+      <button id="vb" aria-pressed="true">Board</button>
+      <button id="vs" aria-pressed="false">Sprint plan</button>
+      <button id="vr" aria-pressed="false">Roadmap by theme</button>
+    </div>
+    <input type="search" id="q" placeholder="Search features" aria-label="Search features">
+    <button class="btn" id="reset">Reset to proposed</button>
+    <button class="btn" id="copy">Copy as CSV</button>
+    <button class="btn" id="copyT">Copy sprint plan as CSV</button>
+    <button class="btn" id="theme">Toggle theme</button>
+  </div>
+  <div class="chips" id="chips" aria-label="Filter by theme"></div>
+  <div class="stats" id="stats"></div>
+</header>
+<main>
+  <div class="board" id="board"></div>
+  <div class="road hidden" id="road"></div>
+</main>
+<footer>Stages come from the Proposed Stage column. Proposed Next, Later and Out items start in the Backlog with a matching tag; Next sorts first and Out sorts last. Three features have no proposal yet and start in Needs triage. Score is the priority score from the scope sheet; unscored items sort last. Your schedule, new tiles and week settings are saved in this browser only, so use Copy sprint plan as CSV to take them elsewhere.</footer>
+
+<script>
+const STAGES=[
+ {k:'Triage',n:'Needs triage',d:'No proposal yet',c:'--triage'},
+ {k:'Backlog',n:'Backlog',d:'Tagged Next, Later or Out. Next sorts first, Out sorts last.',c:'--later'},
+ {k:'V1',n:'V1',d:'Not scheduled yet. Drag a tile right into a week.',c:'--v1'}
+];
+const GROUPS={
+ 'Senior Voice':'#2f8f83','Calendar View':'#12a4c8','Profile':'#2e9e5b','Clinical & Care Record':'#4a6fd1','Connection':'#c4639a','Family & Care Circle':'#d08a1e','Safety':'#cf4b3f',
+ 'Ambient Capture':'#7a54c9','Provider & Enterprise':'#3a8fb7','Trust & Compliance':'#5d7a3a','Operations':'#7b8794','Device & Platform':'#a0663a'
+};
+// [group, name, description, score, proposed, source, flag, note]
+const D=[
+['Senior Voice','Voice Conversation','Responds when addressed, can be interrupted, repeats on request, waits for slow speakers. Live speech-to-text run still to do.',null,'V1','Decisions 1, 10'],
+['Senior Voice','Slower, Louder, Bigger Words On Request','The senior asks and the setting sticks.',null,'V1','Conversation Design'],
+['Calendar View','Speaks Up First','Planner with priorities, quiet hours and a daily limit on unprompted speech.',null,'V1','Agent Design'],
+['Calendar View','Morning Briefing','Weather, schedule, who is coming.',9,'V1','Use Case 10'],
+['Senior Voice','Hears Family Messages','Recorded voice or typed, played when the senior is free.',9,'V1','Use Case 11'],
+['Senior Voice','Sends Messages To Family By Voice','“Tell Sarah…” with an explicit yes before sending.',9,'V1','Use Case 11'],
+['Senior Voice','Says The Record Is Wrong','The senior can dispute a fact and the family sees it.',null,'V1','Added during build'],
+['Senior Voice','Hydration And Meal Reminders','Reminders and logging.',8,'Later','Use Case 17'],
+['Senior Voice','Music, Audiobooks, News','On request.',7,'Later','Use Case 20'],
+['Senior Voice','Orientation Support For MCI','Prompt guidance only. No MCI setting yet.',6,'Later','Use Case 27'],
+['Senior Voice','Cognitive Games','',6,'Later','Use Case 30'],
+['Senior Voice','Mail And Bill Explainer From A Photo','',5,'Later','Use Case 34'],
+['Senior Voice','Multi-language','',null,'Triage',''],
+
+['Profile','Care Record','Medicines, appointments, contacts. Facts marked verified or reported. Family confirms in Needs Your OK.',null,'V1','Decision 13'],
+['Calendar View','Med Reminders With Dose Log','Reminds, confirms, logs, retries.',11,'V1','Use Case 3'],
+['Clinical & Care Record','Appointment Tracking And Reminders','',12,'V1','Use Case 2'],
+['Clinical & Care Record','Daily Check-In','Mood, sleep, pain, from natural answers.',10,'V1','Use Case 5'],
+['Profile','Emergency Sheet','Meds, allergies, contacts, directives on one page.',10,'V1','Use Case 6'],
+['Profile','Papers: Profile Setup From Photos And Documents','Upload, read, every item goes to Needs Your OK.',6,'V1','Use Case 21'],
+['Clinical & Care Record','Pre-Visit Prep','Questions for the Doctor list is built. Symptom summary is not.',8,'V1','Use Case 12',null,'Start with a note on a calendar invite and then build this out later.'],
+['Clinical & Care Record','Post-Visit Capture','Appointments hold post-visit notes. No capture flow.',8,'Next','Use Case 13'],
+['Clinical & Care Record','Vitals By Voice','Can be logged as an observation. No dedicated flow.',8,'Next','Use Case 14'],
+['Clinical & Care Record','Refill Tracking','',6,'Next','Use Case 24'],
+['Clinical & Care Record','Discharge Instructions Turned Into Tasks','',6,'Next','Use Case 23'],
+['Clinical & Care Record','Document Vault','Papers stores uploads. No vault for POA and insurance.',6,'Next','Use Case 22'],
+['Clinical & Care Record','Exercise And Care-Plan Prompts','',6,'Later','Use Case 29',null,'Open question: Apple Health integration?'],
+['Clinical & Care Record','Progression Questionnaires','Dementia, CHF, Parkinson’s.',6,'Later','Use Case 25'],
+['Clinical & Care Record','Connected Vitals Devices','BLE cuff and scale.',5,'Later','Use Case 31'],
+['Clinical & Care Record','Med Questions','“What is this pill for?”',4,'Out','Use Case 38','High accuracy risk'],
+['Clinical & Care Record','Drug Interaction Flags','Needs a licensed database.',3,'Out','Use Case 42','High accuracy risk'],
+['Clinical & Care Record','Scan In Medication','',null,'Triage',''],
+
+['Connection','Daily Photo','The caregiver is prompted to send a photo of their day. It opens on the iPad with no steps for the senior.',null,'V1','Susan, 11/6'],
+['Profile','Life Story And Memory Capture','Story details are saved as learned preferences. No guided capture.',9,'Next','Use Case 9'],
+['Connection','Prompts To Join Center Activities','Needs the provider link.',null,'Next','John, 10/16'],
+['Connection','Classes And Engagement','Not V1, probably not V2.',null,'Later','Paul, 11/6'],
+['Connection','Human Check-Ins Or Virtual Care','People who call the senior.',null,'Later','John, 10/16'],
+['Connection','Companionship And Reminiscence Conversation','Conflicts with the 11/6 guardrail: not a friend.',6,'Out','Use Case 26'],
+['Connection','Eating Habits / Grocery List','',null,'Triage',''],
+
+['Calendar View','Today And Past Days','Her day, Up Next, and How Ava Knows on every item.',9,'V1','Use Case 7'],
+['Family & Care Circle','Evening Summary By Role','Each person sees what their access allows.',9,'V1','Use Case 7'],
+['Family & Care Circle','Missed Check-In Alert','Alert with Who Knows and acknowledgement.',13,'V1','Use Case 1'],
+['Family & Care Circle','Ask Ava','Answers from the record, with the source named.',7,'V1','Use Case 18'],
+['Profile','Invites, Roles And Sharing Policy','The person in charge decides who sees what.',null,'V1','Decision 9'],
+['Family & Care Circle','What Ava Has Told People','A true answer to “What have you told Sarah?” for family and the senior.',null,'V1','Sharing Policy'],
+['Profile','Companion Settings','Per-person voice settings and change history.',null,'V1','Added during build'],
+['Calendar View','Aide Today And Notes','Start and end a visit, note for the family, today’s plan.',7,'V1','Use Case 19'],
+['Family & Care Circle','Native Family App','iOS and Android.',null,'Next','Decision 16'],
+['Family & Care Circle','SMS And Messaging Channels','Reach the same agent by text.',null,'Next','Decision 16'],
+['Family & Care Circle','Family Task Coordination','The agent can create tasks. No shared task view.',3,'Later','Use Case 39'],
+['Family & Care Circle','Private-Pay Aide Scheduling','',5,'Later','Use Case 32'],
+['Family & Care Circle','Care Service Search','Adult day and home care nearby.',5,'Later','Use Case 35'],
+['Family & Care Circle','Benefits Navigation','Medicaid waiver, Medicare plans.',4,'Later','Use Case 37'],
+['Family & Care Circle','Caregiver Burnout Check-Ins','',3,'Later','Use Case 40'],
+['Family & Care Circle','Caregiving How-To Coach','',3,'Later','Use Case 41'],
+['Family & Care Circle','Expense Tracking And Sibling Split','',2,'Later','Use Case 43'],
+
+['Safety','Red-Flag Escalation','Alerts the family right away and bypasses every limit.',9,'V1','Use Case 8'],
+['Safety','Crisis Script','Refers to 988 and notifies the person in charge.',null,'V1','Conversation Design'],
+['Safety','Night Alert Order','Family in order, then provider on-call, then 911. Today 911 is only spoken guidance.',null,'Next','Positioning Page'],
+['Safety','Scam And Fraud Call Guard','',8,'Later','Use Case 16'],
+['Safety','Fall Detection Hardware','Hardware or wearable.',5,'Later','Use Case 36'],
+['Safety','Location And Wandering Alerts','',1,'Later','Use Case 44'],
+
+['Ambient Capture','Always-On Capture On The iPad','Voice detection, segments, encryption. Tested on macOS, not on a device.',null,'V1','Decisions 2, 25'],
+['Ambient Capture','Sound Events','Cough, thump, alarm, TV.',null,'V1','Decision 25'],
+['Ambient Capture','Encrypted Upload From The iPad','Upload queue is built. The uploader is not connected.',null,'V1','Decision 33'],
+['Ambient Capture','Cloud Processing','Transcription, signals, daily trends, retention. Transcription is mocked until the AssemblyAI key is set.',null,'V1','Decision 25'],
+['Ambient Capture','Speaker ID With Enrolled Voice','Keeps the senior’s speech and drops other speakers. Required by the capture rules.',null,'V1','Section 5'],
+['Ambient Capture','Labeling And Accuracy By Signal','In the ops console. Decides when a signal may drive behavior.',null,'V1','Section 5'],
+['Ambient Capture','Mute And Forget The Last Hour','Mute stops both listening lanes and storage.',null,'V1','Section 5'],
+['Ambient Capture','Live Safety Check After A Fall Sound','“Are you OK?” on a live event. The conversation path exists. Off until the signal passes.',null,'Next','Decision 11'],
+['Ambient Capture','Ambient Trends Shared With Family','In the family mockup. Capture-only in V1.',null,'Next','Section 8'],
+['Ambient Capture','Family Review Of Audio','Lets a family listen to an event.',null,'Next','Positioning Page'],
+['Ambient Capture','Validated Signals Drive Alerts','One signal at a time, after its accuracy is measured.',null,'Next','Decision 25'],
+['Ambient Capture','Cognitive Decline From Speech Patterns','Raised by John for cognition and heart changes.',0,'Out','Use Case 45; John, 11/4','FDA medical device per the research notes'],
+
+['Provider & Enterprise','Provider Connector And Stub','Adapter interface and sync. Many providers per person.',null,'V1','Decisions 19, 20'],
+['Provider & Enterprise','Seniorverse Adult Day Link','Attendance, activities, incidents. Contents of the thin link are open.',11,'Next','Use Case 4'],
+['Provider & Enterprise','Connect A Provider Screen','',null,'Next','Added during build'],
+['Provider & Enterprise','Provider View','What a center or agency sees and manages. No design yet.',null,'Next','Paul, 11/6'],
+['Provider & Enterprise','Per-Member Fee And Billing','No billing exists.',null,'Next','Paul, 10/16 and 11/6'],
+['Provider & Enterprise','Overnight Coverage Add-On','Sold through a center or agency. Not costed.',null,'Next','Positioning Page'],
+['Provider & Enterprise','Home Care Agency Link','Visit notes, EVV.',8,'Later','Use Case 15'],
+['Provider & Enterprise','Automated Night Checks In Assisted Living','',null,'Later','Paul, 11/6'],
+['Provider & Enterprise','Change-Of-Condition Reports','To an agency or coordinator.',6,'Later','Use Case 28'],
+['Provider & Enterprise','Intake And Assessment Pre-Fill','',5,'Later','Use Case 33'],
+['Provider & Enterprise','Clinician Sharing And Health-System Data','',null,'Later','John, 11/4'],
+['Provider & Enterprise','Lighter Version For 55+ Housing','',null,'Later','Paul, 10/16'],
+['Provider & Enterprise','Engagement Reporting For Payers','PACE and MA plans.',-1,'Later','Use Case 46'],
+
+['Trust & Compliance','Health Facts From The Record, With Source','A separate check runs before health statements go out.',null,'V1','Decision 13'],
+['Trust & Compliance','Fixed Refusals','Dosing, diagnosis, changing meds. Each with a next step.',null,'V1','Agent Design'],
+['Trust & Compliance','“Not Human” Notice','On the New York schedule.',null,'V1','Positioning Page'],
+['Profile','Access Enforced Outside The Model','Role, tier, confirmation, append-only facts.',null,'V1','Section 9'],
+['Trust & Compliance','Consent Documents','Senior, household, aides, visitor notice, biometric. Needs counsel.',null,'V1','Build Plan'],
+['Trust & Compliance','Pilot State Review And Retention Schedule','Needs counsel.',null,'V1','Build Plan'],
+['Trust & Compliance','Pilot Metric Thresholds','Pass and fail numbers.',null,'V1','Build Plan'],
+
+['Operations','Traces, Replay, Evals And Prompts','See and tune every model call.',null,'V1','Decision 31'],
+['Operations','Fleet, Costs, Audit, Alerts, Pilot Admin','',null,'V1','Decision 31'],
+['Operations','Deletion Requests','Whole-person deletion and deletion of summaries are not built.',null,'V1','Build Plan'],
+
+['Device & Platform','Locked iPad App','Builds and launches in the simulator. Needs signing, MDM and a device.',null,'V1','Decisions 4, 30'],
+['Device & Platform','iPad, Mic Array, Stand And Hub','Hardware was ordered 10/28. The build plan still shows it pending.',null,'V1','Build Plan'],
+['Device & Platform','Long Open-Mic Test On A Device','',null,'V1','Build Plan'],
+['Device & Platform','Voice QA With A Person Listening','',null,'V1','Decision 32'],
+['Device & Platform','iPad Versus Raspberry Pi Comparison','Bench test only.',null,'V1','Paul, 10/28'],
+['Device & Platform','On-Device Small Model','Handles speech and simple commands. Hardware cost versus price is open.',null,'Later','Paul, 10/28'],
+['Device & Platform','Sonos Or Speaker Partnership','Playback API only, no documented mic access. Needs a business partnership.',null,'Later','John, 10/28; Research Notes'],
+['Device & Platform','Dedicated Hardware','Pi 5 appliance, then cost-down.',null,'Later','Decision 15'],
+['Device & Platform','Trusted Care Content From CaringKind','',null,'Later','Paul, 10/12']
+];
+const items=D.map((r,i)=>{const bl=r[4]==='Next'||r[4]==='Later'||r[4]==='Out';const ps=bl?'Backlog':r[4];const pt=bl?r[4]:'Later';const pw=ps==='V1'?(r[0]==='Profile'?0:r[0]==='Calendar View'?1:null):null;return {id:i,group:r[0],name:r[1],desc:r[2],score:r[3],source:r[5],risk:r[6]||'',note:r[7]||'',pStage:ps,pTag:pt,stage:ps,tag:pt,pWeek:pw,week:pw}});
+const CKEY='care-companion-custom-v1';
+try{const c=JSON.parse(localStorage.getItem(CKEY)||'null');if(Array.isArray(c))c.forEach(x=>items.push({id:items.length,group:GROUPS[x.group]?x.group:'Operations',name:x.name,desc:x.desc||'',score:null,source:'Added by you',risk:'',note:'',custom:true,deleted:!!x.deleted,pStage:x.pStage,pTag:x.pTag,stage:x.pStage,tag:x.pTag}))}catch(e){}
+function saveCustom(){try{localStorage.setItem(CKEY,JSON.stringify(items.filter(i=>i.custom).map(i=>({group:i.group,name:i.name,desc:i.desc,pStage:i.pStage,pTag:i.pTag,deleted:!!i.deleted}))))}catch(e){}}
+const KEY='care-companion-stages-v3';
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s)items.forEach(it=>{if(s[it.id]){it.stage=s[it.id][0];it.tag=s[it.id][1];it.week=s[it.id][2]==null?null:s[it.id][2]}})}catch(e){}
+function save(){try{const o={};items.forEach(it=>{if(it.stage!=='V1')it.week=null;if(isChanged(it)||(it.week??null)!==(it.pWeek??null))o[it.id]=[it.stage,it.tag,it.week==null?null:it.week]});localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}}
+
+let view='board',activeGroup=null,query='';
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const tagOrder=t=>t==='Next'?0:t==='Later'?1:2;
+const isChanged=it=>it.stage!==it.pStage||(it.stage==='Backlog'&&it.tag!==it.pTag);
+const origLabel=it=>it.pStage==='Backlog'?'Backlog ('+it.pTag+')':it.pStage==='Triage'?'Needs triage':it.pStage;
+const PIN=['Profile','Calendar View'];
+const pin=i=>{const k=PIN.indexOf(i.group);return k<0?PIN.length:k};
+const sorter=(a,b)=>(a.stage==='V1'&&b.stage==='V1'?pin(a)-pin(b):0)||(a.stage==='Backlog'&&b.stage==='Backlog'?tagOrder(a.tag)-tagOrder(b.tag):0)||(b.score??-99)-(a.score??-99)||a.id-b.id;
+const visible=it=>!it.deleted&&(!activeGroup||it.group===activeGroup)&&(!query||(it.name+' '+it.desc+' '+it.group).toLowerCase().includes(query));
+
+function chips(){
+  const box=$('chips');box.innerHTML='';
+  const mk=(label,val)=>{const b=document.createElement('button');b.className='chip';b.textContent=label;b.setAttribute('aria-pressed',String(activeGroup===val));b.onclick=()=>{activeGroup=val;render()};box.appendChild(b)};
+  mk('All themes',null);Object.keys(GROUPS).forEach(g=>mk(g,g));
+}
+function stats(){
+  $('stats').innerHTML=STAGES.map(s=>{const l=items.filter(i=>i.stage===s.k&&visible(i));const extra=s.k==='Backlog'?` (Next ${l.filter(i=>i.tag==='Next').length}, Later ${l.filter(i=>i.tag==='Later').length}, Out ${l.filter(i=>i.tag==='Out').length})`:'';return `<span class="stat s-${s.k.toLowerCase()}">${s.n}: ${l.length}${extra}</span>`}).join('');
+}
+function cardHTML(it){
+  const opts=STAGES.map(s=>`<option value="${s.k}" ${s.k===it.stage&&it.week==null?'selected':''}>${s.k==='V1'?'V1 (unscheduled)':s.n}</option>`).join('')+Array.from({length:W.weeks},(_,w)=>`<option value="w${w}" ${it.week===w?'selected':''}>Week ${w+1}</option>`).join('');
+  return `<div class="card" draggable="true" tabindex="0" data-id="${it.id}" style="--g:${GROUPS[it.group]}">
+    <h3>${esc(it.name)}</h3>
+    ${it.desc?`<p>${esc(it.desc)}</p>`:''}
+    <div class="meta">${it.stage==='Backlog'?`<span class="bt bt-${it.tag.toLowerCase()}">${it.tag}</span>`:''}<span class="tag">${esc(it.group)}</span>${it.source?`<span>${esc(it.source)}</span>`:''}${it.score!==null?`<span class="score" title="Priority score">${it.score}</span>`:''}</div>
+    ${it.risk?`<div class="meta"><span class="risk">▲ ${esc(it.risk)}</span></div>`:''}
+    ${it.note?`<div class="note">${esc(it.note)}</div>`:''}
+    <div class="move"><label class="meta">Move to <select data-id="${it.id}" aria-label="Move ${esc(it.name)}">${opts}</select></label>${it.stage==='Backlog'?` <label class="meta">Tag <select data-tag="${it.id}" aria-label="Backlog tag for ${esc(it.name)}"><option value="Next" ${it.tag==='Next'?'selected':''}>Next</option><option value="Later" ${it.tag==='Later'?'selected':''}>Later</option><option value="Out" ${it.tag==='Out'?'selected':''}>Out</option></select></label>`:''}${isChanged(it)?` <span class="changed">Changed from ${origLabel(it)}</span>`:''}${it.custom?` <button class="btn" data-delcard="${it.id}">Delete tile</button>`:''}</div>
+  </div>`;
+}
+function board(){
+  const el=$('board');el.innerHTML='';
+  STAGES.forEach(s=>{
+    if(view==='sprint'&&s.k!=='V1')return;
+    const list=items.filter(i=>i.stage===s.k&&visible(i)&&!(s.k==='V1'&&i.week!=null)).sort(sorter);
+    const col=document.createElement('section');col.className='col';col.dataset.stage=s.k;col.style.setProperty('--c',`var(${s.c})`);
+    col.innerHTML=`<div class="col-h"><h2><span>${s.n} <button class="plus" data-newstage="${s.k}" aria-label="New tile in ${s.n}">+</button></span><span>${list.length}</span></h2><p>${s.d}</p></div><div class="col-body">${creating===s.k?newForm(s.k):''}${list.map(cardHTML).join('')||'<div class="empty">Nothing here. Drag a card in.</div>'}</div>`;
+    el.appendChild(col);
+  });
+  sprintCols(el);
+  el.querySelectorAll('.card').forEach(c=>{
+    c.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',c.dataset.id);c.classList.add('dragging')});
+    c.addEventListener('dragend',()=>c.classList.remove('dragging'));
+  });
+  el.querySelectorAll('.col[data-stage]').forEach(col=>{
+    col.addEventListener('dragover',e=>{e.preventDefault();col.classList.add('over')});
+    col.addEventListener('dragleave',()=>col.classList.remove('over'));
+    col.addEventListener('drop',e=>{e.preventDefault();col.classList.remove('over');const id=+e.dataTransfer.getData('text/plain');const it=items[id];if(it){it.stage=col.dataset.stage;it.week=null;save();render()}});
+  });
+  el.querySelectorAll('select[data-id]').forEach(s=>s.addEventListener('change',()=>{const it=items[+s.dataset.id];if(s.value[0]==='w'){it.stage='V1';it.week=+s.value.slice(1)}else{it.stage=s.value;it.week=null}save();render()}));
+  el.querySelectorAll('select[data-tag]').forEach(s=>s.addEventListener('change',()=>{items[+s.dataset.tag].tag=s.value;save();render()}));
+  bindNew(el);
+}
+function road(){
+  const el=$('road');
+  const cols=['Triage','Backlog','V1'];
+  let h='<div class="grid"><div class="gh" style="--c:var(--ink)">Theme</div>'+STAGES.map(s=>`<div class="gh" style="--c:var(${s.c})">${s.n} (${items.filter(i=>i.stage===s.k&&visible(i)).length})</div>`).join('');
+  Object.keys(GROUPS).filter(g=>!activeGroup||g===activeGroup).forEach(g=>{
+    const all=items.filter(i=>i.group===g&&visible(i));
+    h+=`<div class="rl" style="--g:${GROUPS[g]}">${esc(g)}<small>${all.length} features</small></div>`;
+    cols.forEach(c=>{
+      const l=all.filter(i=>i.stage===c).sort(sorter);
+      h+=`<div class="cell">${l.map(i=>`<div class="pill">${c==='Backlog'?`<span class="bt bt-${i.tag.toLowerCase()}">${i.tag}</span> `:''}<b>${esc(i.name)}</b>${i.score!==null?` <span title="Priority score">(${i.score})</span>`:''}${i.risk?`<span class="risk" title="${esc(i.risk)}">▲</span>`:''}</div>`).join('')||'<span class="empty">–</span>'}</div>`;
+    });
+  });
+  el.innerHTML=h+'</div>';
+}
+const SKEY='care-companion-sprint-v2';
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const mondayISO=()=>{const d=new Date();d.setDate(d.getDate()-((d.getDay()+6)%7));return iso(d)};
+let W={weeks:6,start:mondayISO()};
+try{const s=JSON.parse(localStorage.getItem(SKEY)||'null');if(s&&s.weeks&&s.start)W=s}catch(e){}
+function saveW(){try{localStorage.setItem(SKEY,JSON.stringify(W))}catch(e){}}
+let creating=null;
+function newForm(k){
+  const g=Object.keys(GROUPS).map(x=>`<option${x===activeGroup?' selected':''}>${esc(x)}</option>`).join('');
+  return `<div class='newtile'><input data-nname placeholder='Tile name' aria-label='Tile name'><input data-ndesc placeholder='Short description (optional)' aria-label='Description'><select data-ngroup aria-label='Theme'>${g}</select>${k==='Backlog'?`<select data-ntag aria-label='Backlog tag'><option>Next</option><option>Later</option><option>Out</option></select>`:''}<div class='row2'><button class='btn' data-ncreate='${k}'>Add tile</button><button class='btn' data-ncancel>Cancel</button></div></div>`;
+}
+function bindNew(el){
+  el.querySelectorAll('[data-newstage]').forEach(b=>b.onclick=()=>{creating=creating===b.dataset.newstage?null:b.dataset.newstage;render();const n=el.querySelector('[data-nname]');if(n)n.focus()});
+  const make=k=>{
+    const n=el.querySelector('[data-nname]');if(!n)return;const name=n.value.trim();if(!name){n.focus();return}
+    const tg=el.querySelector('[data-ntag]');
+    const tag=tg?tg.value:'Later';const wk=k[0]==='w';
+    items.push({id:items.length,group:el.querySelector('[data-ngroup]').value,name:name,desc:el.querySelector('[data-ndesc]').value.trim(),score:null,source:'Added by you',risk:'',note:'',custom:true,pStage:wk?'V1':k,pTag:tag,stage:wk?'V1':k,tag:tag,week:wk?+k.slice(1):null});
+    saveCustom();save();creating=null;render();
+  };
+  el.querySelectorAll('[data-ncreate]').forEach(b=>b.onclick=()=>make(b.dataset.ncreate));
+  el.querySelectorAll('[data-ncancel]').forEach(b=>b.onclick=()=>{creating=null;render()});
+  el.querySelectorAll('[data-nname],[data-ndesc]').forEach(i=>i.addEventListener('keydown',e=>{if(e.key==='Enter'&&creating)make(creating)}));
+  el.querySelectorAll('[data-delcard]').forEach(b=>b.onclick=()=>{items[+b.dataset.delcard].deleted=true;saveCustom();render()});
+}
+const escA=s=>esc(String(s)).replace(/'/g,'&#39;');
+const fmtD=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+function weekRange(w){const a=new Date(W.start+'T00:00:00');a.setDate(a.getDate()+7*w);const b=new Date(a);b.setDate(b.getDate()+6);return fmtD(a)+' to '+fmtD(b)}
+function sprintCols(el){
+  for(let w=0;w<W.weeks;w++){
+    const list=items.filter(i=>i.stage==='V1'&&i.week===w&&visible(i)).sort(sorter);
+    const col=document.createElement('section');
+    col.className='col wk'+(w===0?' sprint-start':'');col.dataset.week=w;col.style.setProperty('--c','var(--ink)');
+    const head=w===0?`<label class='meta'>Week 1 starts <input type='date' id='sstart' value='${W.start}'></label>`:'';
+    col.innerHTML=`<div class='col-h'><h2><span>Week ${w+1} <button class='plus' data-newstage='w${w}' aria-label='New tile in week ${w+1}'>+</button></span><span>${list.length}</span></h2><p>${weekRange(w)}</p>${head}</div><div class='col-body'>${creating==='w'+w?newForm('w'+w):''}${list.map(cardHTML).join('')||`<div class='empty'>Drag a V1 tile here.</div>`}</div>`;
+    el.appendChild(col);
+  }
+  const ctl=document.createElement('div');ctl.className='wk-add';
+  ctl.innerHTML=`<button class='btn' id='addwk'>+ Add week</button><button class='btn' id='rmwk'>Remove last week</button>`;
+  el.appendChild(ctl);
+  el.querySelectorAll('.col.wk').forEach(col=>{
+    col.addEventListener('dragover',e=>{e.preventDefault();col.classList.add('over')});
+    col.addEventListener('dragleave',()=>col.classList.remove('over'));
+    col.addEventListener('drop',e=>{e.preventDefault();col.classList.remove('over');const it=items[+e.dataTransfer.getData('text/plain')];if(it){it.stage='V1';it.week=+col.dataset.week;save();render()}});
+  });
+  const sd=el.querySelector('#sstart');if(sd)sd.onchange=()=>{if(sd.value){W.start=sd.value;saveW();render()}};
+  el.querySelector('#addwk').onclick=()=>{W.weeks=Math.min(W.weeks+1,26);saveW();render()};
+  el.querySelector('#rmwk').onclick=()=>{if(W.weeks>1){items.forEach(i=>{if(i.week===W.weeks-1)i.week=null});W.weeks--;saveW();save();render()}};
+}
+function render(){stats();if(view==='board'||view==='sprint'){board()}else{road()}}
+function setView(v){
+  view=v;$('vb').setAttribute('aria-pressed',String(v==='board'));$('vr').setAttribute('aria-pressed',String(v==='road'));$('vs').setAttribute('aria-pressed',String(v==='sprint'));
+  $('board').classList.toggle('hidden',v==='road');$('road').classList.toggle('hidden',v!=='road');render();
+}
+$('vb').onclick=()=>setView('board');$('vr').onclick=()=>setView('road');$('vs').onclick=()=>setView('sprint');
+$('q').oninput=e=>{query=e.target.value.trim().toLowerCase();render()};
+$('reset').onclick=()=>{items.forEach(i=>{i.stage=i.pStage;i.tag=i.pTag;i.week=i.pWeek??null});save();render()};
+$('copyT').onclick=async()=>{
+  const q=s=>'"'+String(s).replace(/"/g,'""')+'"';
+  const rows=[['Week','Dates','Feature','Theme'].join(',')];
+  items.filter(i=>i.week!=null&&!i.deleted).sort((a,b)=>a.week-b.week||sorter(a,b)).forEach(i=>rows.push(['Week '+(i.week+1),weekRange(i.week),i.name,i.group].map(q).join(',')));
+  const btn=$('copyT');
+  try{await navigator.clipboard.writeText(rows.join('\n'));btn.textContent='Copied'}catch(e){btn.textContent='Copy blocked by browser'}
+  setTimeout(()=>btn.textContent='Copy sprint plan as CSV',1800);
+};
+$('theme').onclick=()=>{const r=document.documentElement;const dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;r.dataset.theme=dark?'light':'dark'};
+$('copy').onclick=async()=>{
+  const q=s=>'"'+String(s).replace(/"/g,'""')+'"';
+  const rows=[['Stage','Backlog tag','Theme','Feature','Score','Description','Source','Risk','Note'].join(',')];
+  STAGES.forEach(s=>items.filter(i=>i.stage===s.k&&!i.deleted).sort(sorter).forEach(i=>rows.push([s.n,s.k==='Backlog'?i.tag:'',i.group,i.name,i.score??'',i.desc,i.source,i.risk,i.note].map(q).join(','))));
+  const btn=$('copy');
+  try{await navigator.clipboard.writeText(rows.join('\n'));btn.textContent='Copied'}catch(e){btn.textContent='Copy blocked by browser'}
+  setTimeout(()=>btn.textContent='Copy as CSV',1800);
+};
+chips();render();
+</script>
+</body>
+</html>
